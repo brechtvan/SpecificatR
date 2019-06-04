@@ -1,15 +1,9 @@
-﻿//-----------------------------------------------------------------------
 // <copyright file="_Visibility.cs" company="David Vanderheyden">
-//     Copyright (c) 2019 All Rights Reserved
+// Copyright (c) David Vanderheyden. All rights reserved.
+// Licensed under the Apache-2.0 license. See https://licenses.nuget.org/Apache-2.0 for full license information.
 // </copyright>
-// <licensed>Distributed under Apache-2.0 license</licensed>
-// <author>David Vanderheyden</author>
-// <date>25/05/2019 10:10:45</date>
-//-----------------------------------------------------------------------
 
 using System.Runtime.CompilerServices;
-
-
 
 [assembly: InternalsVisibleTo("SpecificatR.Infrastructure.Tests")]
 [assembly: InternalsVisibleTo("SpecificatR.Infrastructure.UnitTest.Abstractions")]

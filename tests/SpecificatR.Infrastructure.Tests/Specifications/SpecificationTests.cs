@@ -1,52 +1,33 @@
-﻿//-----------------------------------------------------------------------
 // <copyright file="SpecificationTests.cs" company="David Vanderheyden">
-//     Copyright (c) 2019 All Rights Reserved
+// Copyright (c) David Vanderheyden. All rights reserved.
+// Licensed under the Apache-2.0 license. See https://licenses.nuget.org/Apache-2.0 for full license information.
 // </copyright>
-// <licensed>Distributed under Apache-2.0 license</licensed>
-// <author>David Vanderheyden</author>
-// <date>25/05/2019 17:47:14</date>
-//-----------------------------------------------------------------------
 
 namespace SpecificatR.Infrastructure.Tests
 {
-    using AutoFixture;
-    using FluentAssertions;
-    using Microsoft.EntityFrameworkCore;
-    using SpecificatR.Infrastructure.Tests.Specifications;
-    using SpecificatR.Infrastructure.UnitTest.Abstractions;
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Threading.Tasks;
+    using AutoFixture;
+    using FluentAssertions;
+    using Microsoft.EntityFrameworkCore;
+    using SpecificatR.Infrastructure.Abstractions;
+    using SpecificatR.Infrastructure.UnitTest.Abstractions;
     using Xunit;
 
-    /// <summary>
-    /// Defines the <see cref="SpecificationTests"/>
-    /// </summary>
     public class SpecificationTests
     {
-        /// <summary>
-        /// Defines the _fixture
-        /// </summary>
         private readonly IFixture _fixture = new Fixture();
 
-        /// <summary>
-        /// Defines the _options
-        /// </summary>
         private readonly DbContextOptions<TestDbContext> _options = new DbContextOptions<TestDbContext>();
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SpecificationTests"/> class.
-        /// </summary>
         public SpecificationTests()
         {
             _fixture.Customize<TestEntity>(te => te.Without(w => w.Children));
         }
 
-        /// <summary>
-        /// The Should_ApplyPaging
-        /// </summary>
-        /// <returns>The <see cref="Task"/></returns>
         [Fact]
         public async Task Should_ApplyPaging()
         {
@@ -96,10 +77,6 @@ namespace SpecificatR.Infrastructure.Tests
             result.Should().Equals(orderedList);
         }
 
-        /// <summary>
-        /// The Should_SetCriteria
-        /// </summary>
-        /// <returns>The <see cref="Task"/></returns>
         [Fact]
         public async Task Should_SetCriteria()
         {
@@ -115,29 +92,25 @@ namespace SpecificatR.Infrastructure.Tests
             result.Should().NotBeNull().And.BeEquivalentTo(entities[0]);
         }
 
-        /// <summary>
-        /// The CharactersOfTypeHumanSpecification_ShouldApplySpecification
-        /// </summary>
-        /// <returns>The <see cref="Task"/></returns>
         [Fact]
         public async Task TestEntityWithChildEntitiesSpecification_ShouldApplySpecification()
         {
             // Arrange
             var parentGuid = Guid.NewGuid();
-            var childEntity = _fixture.Build<TestEntityChild>()
+            TestEntityChild childEntity = _fixture.Build<TestEntityChild>()
                 .Without(wh => wh.Parent)
                 .With(wh => wh.ParentId, parentGuid)
                 .Create();
-            var testEntitiesWithChild = _fixture.Build<TestEntity>()
+            IEnumerable<TestEntity> testEntitiesWithChild = _fixture.Build<TestEntity>()
                 .With(w => w.Id, parentGuid)
                 .With(w => w.Children, new List<TestEntityChild> { childEntity })
                 .CreateMany(3);
 
-            var testEntitiesWithoutChildren = _fixture.Build<TestEntity>()
+            IEnumerable<TestEntity> testEntitiesWithoutChildren = _fixture.Build<TestEntity>()
                 .Without(wh => wh.Children)
                 .CreateMany(5);
 
-            List<TestEntity> testEntities = new List<TestEntity>();
+            var testEntities = new List<TestEntity>();
             testEntities.AddRange(testEntitiesWithoutChildren);
             testEntities.AddRange(testEntitiesWithChild);
 
@@ -148,6 +121,57 @@ namespace SpecificatR.Infrastructure.Tests
 
             // Assert
             testEntityResults.Should().NotBeNull().And.HaveSameCount(testEntitiesWithChild);
+        }
+
+        private class TestEntityWithChildEntitiesSpecification : BaseSpecification<TestEntity>
+        {
+            public TestEntityWithChildEntitiesSpecification()
+                : base(BuildCriteria())
+            {
+            }
+
+            private static Expression<Func<TestEntity, bool>> BuildCriteria()
+            {
+                return x => x.Children != null && x.Children.Any();
+            }
+        }
+
+        private class TestEntityByIdSpecification : BaseSpecification<TestEntity>
+        {
+            public TestEntityByIdSpecification(Guid id)
+                : base(BuildCriteria(id))
+            {
+            }
+
+            private static Expression<Func<TestEntity, bool>> BuildCriteria(Guid id)
+                => x => x.Id == id;
+        }
+
+        private class TestEntityOrderByNameAscSpecification : BaseSpecification<TestEntity>
+        {
+            public TestEntityOrderByNameAscSpecification()
+                : base(null)
+            {
+                AddOrderBy(o => o.Name, OrderByDirection.Ascending);
+            }
+        }
+
+        private class TestEntityOrderByNameDescSpecification : BaseSpecification<TestEntity>
+        {
+            public TestEntityOrderByNameDescSpecification()
+                : base(null)
+            {
+                AddOrderBy(o => o.Name, OrderByDirection.Descending);
+            }
+        }
+
+        private class TestEntityPaginatedSpecification : BaseSpecification<TestEntity>
+        {
+            public TestEntityPaginatedSpecification(int pageIndex, int pageSize)
+                : base(null)
+            {
+                ApplyPaging(pageIndex, pageSize);
+            }
         }
     }
 }

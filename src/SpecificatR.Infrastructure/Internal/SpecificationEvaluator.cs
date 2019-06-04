@@ -1,34 +1,21 @@
-﻿//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 // <copyright file="SpecificationEvaluator.cs" company="David Vanderheyden">
-//     Copyright (c) 2019 All Rights Reserved
+// Copyright (c) David Vanderheyden. All rights reserved.
+// Licensed under the Apache-2.0 license. See https://licenses.nuget.org/Apache-2.0 for full license information.
 // </copyright>
-// <licensed>Distributed under Apache-2.0 license</licensed>
-// <author>David Vanderheyden</author>
-// <date>25/05/2019 10:10:45</date>
 //-----------------------------------------------------------------------
 
 namespace SpecificatR.Infrastructure.Internal
 {
-    using Microsoft.EntityFrameworkCore;
-    using SpecificatR.Infrastructure.Abstractions;
     using System;
     using System.Linq;
     using System.Linq.Expressions;
+    using Microsoft.EntityFrameworkCore;
+    using SpecificatR.Infrastructure.Abstractions;
 
-    /// <summary>
-    /// Defines the <see cref="SpecificationEvaluator{ClassType, IdType}" />
-    /// </summary>
-    /// <typeparam name="TEntity"></typeparam>
-    /// <typeparam name="TIdentifier"></typeparam>
     internal class SpecificationEvaluator<TEntity, TIdentifier>
         where TEntity : class, IBaseEntity<TIdentifier>
     {
-        /// <summary>
-        /// The GetQuery
-        /// </summary>
-        /// <param name="inputQuery">The inputQuery<see cref="IQueryable{ClassType}"/></param>
-        /// <param name="specification">The specification<see cref="ISpecification{ClassType}"/></param>
-        /// <returns>The <see cref="IQueryable{ClassType}"/></returns>
         internal static IQueryable<TEntity> GetQuery(IQueryable<TEntity> inputQuery, ISpecification<TEntity> specification)
         {
             IQueryable<TEntity> outputQuery = inputQuery;
@@ -48,12 +35,6 @@ namespace SpecificatR.Infrastructure.Internal
             return outputQuery;
         }
 
-        /// <summary>
-        /// The GetQueryWithCount
-        /// </summary>
-        /// <param name="inputQuery">The inputQuery<see cref="IQueryable{ClassType}"/></param>
-        /// <param name="specification">The specification<see cref="ISpecification{ClassType}"/></param>
-        /// <returns>The <see cref="(IQueryable{TEntity} query, int filteredCount)"/></returns>
         internal static (IQueryable<TEntity> query, int filteredCount) GetQueryWithCount(IQueryable<TEntity> inputQuery, ISpecification<TEntity> specification)
         {
             IQueryable<TEntity> outputQuery = inputQuery;
@@ -75,12 +56,6 @@ namespace SpecificatR.Infrastructure.Internal
             return (outputQuery, filteredCount);
         }
 
-        /// <summary>
-        /// The SetCriteria
-        /// </summary>
-        /// <param name="outputQuery">The outputQuery<see cref="IQueryable{ClassType}"/></param>
-        /// <param name="criteria">The criteria<see cref="Expression{Func{TEntity, bool}}"/></param>
-        /// <returns>The <see cref="IQueryable{ClassType}"/></returns>
         private static IQueryable<TEntity> SetCriteria(IQueryable<TEntity> outputQuery, Expression<Func<TEntity, bool>> criteria)
         {
             if (criteria == null)
@@ -91,12 +66,6 @@ namespace SpecificatR.Infrastructure.Internal
             return outputQuery.Where(criteria);
         }
 
-        /// <summary>
-        /// The SetIgnoreQueryFilters
-        /// </summary>
-        /// <param name="outputQuery">The outputQuery<see cref="IQueryable{ClassType}"/></param>
-        /// <param name="specification">The specification<see cref="ISpecification{ClassType}"/></param>
-        /// <returns>The <see cref="IQueryable{ClassType}"/></returns>
         private static IQueryable<TEntity> SetIgnoreQueryFilters(IQueryable<TEntity> outputQuery, ISpecification<TEntity> specification)
         {
             if (specification.IgnoreQueryFilters)
@@ -107,12 +76,6 @@ namespace SpecificatR.Infrastructure.Internal
             return outputQuery;
         }
 
-        /// <summary>
-        /// The SetIncludes
-        /// </summary>
-        /// <param name="outputQuery">The outputQuery<see cref="IQueryable{ClassType}"/></param>
-        /// <param name="specification">The specification<see cref="ISpecification{ClassType}"/></param>
-        /// <returns>The <see cref="IQueryable{ClassType}"/></returns>
         private static IQueryable<TEntity> SetIncludes(IQueryable<TEntity> outputQuery, ISpecification<TEntity> specification)
         {
             if (specification.Includes == null || !specification.Includes.Any())
@@ -129,12 +92,6 @@ namespace SpecificatR.Infrastructure.Internal
             return outputQuery;
         }
 
-        /// <summary>
-        /// The SetOrderBy
-        /// </summary>
-        /// <param name="outputQuery">The outputQuery<see cref="IQueryable{ClassType}"/></param>
-        /// <param name="specification">The specification<see cref="ISpecification{ClassType}"/></param>
-        /// <returns>The <see cref="IQueryable{ClassType}"/></returns>
         private static IQueryable<TEntity> SetOrderBy(IQueryable<TEntity> outputQuery, ISpecification<TEntity> specification)
         {
             if (specification.OrderByExpressions == null || !specification.OrderByExpressions.Any())
@@ -163,12 +120,6 @@ namespace SpecificatR.Infrastructure.Internal
             return orderedQuery;
         }
 
-        /// <summary>
-        /// The SetPaging
-        /// </summary>
-        /// <param name="outputQuery">The outputQuery<see cref="IQueryable{ClassType}"/></param>
-        /// <param name="specification">The specification<see cref="ISpecification{ClassType}"/></param>
-        /// <returns>The <see cref="IQueryable{ClassType}"/></returns>
         private static IQueryable<TEntity> SetPaging(IQueryable<TEntity> outputQuery, ISpecification<TEntity> specification)
         {
             if (!specification.IsPagingEnabled)
@@ -179,12 +130,6 @@ namespace SpecificatR.Infrastructure.Internal
             return outputQuery.Skip(specification.Skip).Take(specification.Take);
         }
 
-        /// <summary>
-        /// The SetTracking
-        /// </summary>
-        /// <param name="outputQuery">The outputQuery<see cref="IQueryable{ClassType}"/></param>
-        /// <param name="specification">The specification<see cref="ISpecification{ClassType}"/></param>
-        /// <returns>The <see cref="IQueryable{ClassType}"/></returns>
         private static IQueryable<TEntity> SetTracking(IQueryable<TEntity> outputQuery, ISpecification<TEntity> specification)
         {
             if (specification.AsTracking)

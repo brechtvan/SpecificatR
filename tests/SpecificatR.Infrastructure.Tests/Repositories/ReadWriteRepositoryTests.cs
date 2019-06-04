@@ -1,37 +1,24 @@
-//-----------------------------------------------------------------------
 // <copyright file="ReadWriteRepositoryTests.cs" company="David Vanderheyden">
-//     Copyright (c) 2019 All Rights Reserved
+// Copyright (c) David Vanderheyden. All rights reserved.
+// Licensed under the Apache-2.0 license. See https://licenses.nuget.org/Apache-2.0 for full license information.
 // </copyright>
-// <licensed>Distributed under Apache-2.0 license</licensed>
-// <author>David Vanderheyden</author>
-// <date>25/05/2019 10:10:48</date>
-//-----------------------------------------------------------------------
 
 namespace SpecificatR.Infrastructure.Tests.Repositories
 {
+    using System;
+    using System.Linq;
+    using System.Threading.Tasks;
     using AutoFixture;
     using EntityFrameworkCoreMock;
     using FluentAssertions;
     using Microsoft.EntityFrameworkCore;
     using SpecificatR.Infrastructure.Repositories;
-    using System;
-    using System.Linq;
-    using System.Threading.Tasks;
     using Xunit;
 
-    /// <summary>
-    /// Defines the <see cref="ReadWriteRepositoryTests" />
-    /// </summary>
     public class ReadWriteRepositoryTests
     {
-        /// <summary>
-        /// Defines the _fixture
-        /// </summary>
         private readonly IFixture _fixture = new Fixture();
 
-        /// <summary>
-        /// Defines the _options
-        /// </summary>
         private readonly DbContextOptions<TestDbContext> _options = new DbContextOptions<TestDbContext>();
 
         public ReadWriteRepositoryTests()
@@ -39,17 +26,13 @@ namespace SpecificatR.Infrastructure.Tests.Repositories
             _fixture.Customize<TestEntity>(testEntity => testEntity.Without(w => w.Children));
         }
 
-        /// <summary>
-        /// The AddEntity_ShouldAddEntity
-        /// </summary>
-        /// <returns>The <see cref="Task"/></returns>
         [Fact]
         public async Task AddEntity_ShouldAddEntity()
         {
             // Arrange
             TestEntity entity = _fixture.Create<TestEntity>();
             var dbContextMock = new DbContextMock<TestDbContext>(_options);
-            dbContextMock.CreateDbSetMock(x => x.TestEntities, (x, _) => (x.Id));
+            dbContextMock.CreateDbSetMock(x => x.TestEntities, entityKeyFactory: (x, _) => x.Id);
 
             var repository = new ReadWriteRepository<TestEntity, Guid, TestDbContext>(dbContextMock.Object);
 
@@ -61,17 +44,13 @@ namespace SpecificatR.Infrastructure.Tests.Repositories
             result.Name.Should().Be(entity.Name);
         }
 
-        /// <summary>
-        /// The DeleteAsync_KnownEntity_ShouldDeleteEntity
-        /// </summary>
-        /// <returns>The <see cref="Task"/></returns>
         [Fact]
         public async Task DeleteAsync_KnownEntity_ShouldDeleteEntity()
         {
             // Arrange
             TestEntity[] entities = _fixture.CreateMany<TestEntity>(2).ToArray();
             var dbContextMock = new DbContextMock<TestDbContext>(_options);
-            dbContextMock.CreateDbSetMock(x => x.TestEntities, (x, _) => (x.Id), entities);
+            dbContextMock.CreateDbSetMock(x => x.TestEntities, entityKeyFactory: (x, _) => x.Id, initialEntities: entities);
 
             var repository = new ReadWriteRepository<TestEntity, Guid, TestDbContext>(dbContextMock.Object);
 
@@ -85,17 +64,13 @@ namespace SpecificatR.Infrastructure.Tests.Repositories
             getAll.Should().HaveCount(1);
         }
 
-        /// <summary>
-        /// The DeleteAsync_UnknownEntity_ShouldNotThrowException
-        /// </summary>
-        /// <returns>The <see cref="Task"/></returns>
         [Fact]
         public async Task DeleteAsync_UnknownEntity_ShouldNotThrowException()
         {
             // Arrange
             TestEntity[] entities = _fixture.CreateMany<TestEntity>(2).ToArray();
             var dbContextMock = new DbContextMock<TestDbContext>(_options);
-            dbContextMock.CreateDbSetMock(x => x.TestEntities, (x, _) => (x.Id), entities);
+            dbContextMock.CreateDbSetMock(x => x.TestEntities, entityKeyFactory: (x, _) => x.Id, initialEntities: entities);
 
             var repository = new ReadWriteRepository<TestEntity, Guid, TestDbContext>(dbContextMock.Object);
 
@@ -109,10 +84,6 @@ namespace SpecificatR.Infrastructure.Tests.Repositories
             getAll.Should().HaveCount(2);
         }
 
-        /// <summary>
-        /// The DeleteByIdAsync_KnownEntity_ShouldDeleteEntity
-        /// </summary>
-        /// <returns>The <see cref="Task"/></returns>
         [Fact]
         public async Task DeleteByIdAsync_KnownEntity_ShouldDeleteEntity()
         {
@@ -120,7 +91,7 @@ namespace SpecificatR.Infrastructure.Tests.Repositories
             TestEntity[] entities = _fixture.CreateMany<TestEntity>(2).ToArray();
 
             var dbContextMock = new DbContextMock<TestDbContext>(_options);
-            dbContextMock.CreateDbSetMock(x => x.TestEntities, (x, _) => (x.Id), entities);
+            dbContextMock.CreateDbSetMock(x => x.TestEntities, entityKeyFactory: (x, _) => x.Id, initialEntities: entities);
             var repository = new ReadWriteRepository<TestEntity, Guid, TestDbContext>(dbContextMock.Object);
 
             // Act
@@ -133,10 +104,6 @@ namespace SpecificatR.Infrastructure.Tests.Repositories
             getAll.Should().HaveCount(1);
         }
 
-        /// <summary>
-        /// The DeleteByIdAsync_UnknownEntity_ShouldThrowException
-        /// </summary>
-        /// <returns>The <see cref="Task"/></returns>
         [Fact]
         public async Task DeleteByIdAsync_UnknownEntity_ShouldThrowException()
         {
@@ -144,7 +111,7 @@ namespace SpecificatR.Infrastructure.Tests.Repositories
             TestEntity[] entities = _fixture.CreateMany<TestEntity>(2).ToArray();
 
             var dbContextMock = new DbContextMock<TestDbContext>(_options);
-            dbContextMock.CreateDbSetMock(x => x.TestEntities, (x, _) => (x.Id), entities);
+            dbContextMock.CreateDbSetMock(x => x.TestEntities, entityKeyFactory: (x, _) => x.Id, initialEntities: entities);
             var repository = new ReadWriteRepository<TestEntity, Guid, TestDbContext>(dbContextMock.Object);
 
             // Act
@@ -154,10 +121,6 @@ namespace SpecificatR.Infrastructure.Tests.Repositories
             FluentAssertions.Specialized.ExceptionAssertions<NullReferenceException> result = await deleteEntity.Should().ThrowAsync<NullReferenceException>();
         }
 
-        /// <summary>
-        /// The UpdateAsync_ExistingEntity_ShouldUpdateEntity
-        /// </summary>
-        /// <returns>The <see cref="Task"/></returns>
         [Fact]
         public async Task UpdateAsync_ExistingEntity_ShouldUpdateEntity()
         {
@@ -166,7 +129,7 @@ namespace SpecificatR.Infrastructure.Tests.Repositories
             {
                 Id = Guid.NewGuid(),
                 Name = "Luke Skywalker",
-                Number = 1
+                Number = 1,
             };
 
             DbContextOptions<TestDbContext> options = new DbContextOptionsBuilder<TestDbContext>()
@@ -190,10 +153,6 @@ namespace SpecificatR.Infrastructure.Tests.Repositories
             verifyEntity.Number.Should().Be(2);
         }
 
-        /// <summary>
-        /// The UpdateField_WithoutProperties_ShouldReturnException
-        /// </summary>
-        /// <returns>The <see cref="Task"/></returns>
         [Fact]
         public async Task UpdateField_WithoutProperties_ShouldReturnException()
         {
@@ -202,7 +161,7 @@ namespace SpecificatR.Infrastructure.Tests.Repositories
             {
                 Id = Guid.NewGuid(),
                 Name = "Yoda",
-                Number = 1
+                Number = 1,
             };
 
             DbContextOptions<TestDbContext> options = new DbContextOptionsBuilder<TestDbContext>()
@@ -223,10 +182,6 @@ namespace SpecificatR.Infrastructure.Tests.Repositories
             result.Should().Throw<NullReferenceException>();
         }
 
-        /// <summary>
-        /// The UpdateFieldsAsync_WithMultipleChangedEntities_ShouldOnlyUpdateSpecifiedEntity
-        /// </summary>
-        /// <returns>The <see cref="Task"/></returns>
         [Fact]
         public async Task UpdateFieldsAsync_WithMultipleChangedEntities_ShouldOnlyUpdateSpecifiedEntity()
         {
@@ -235,13 +190,13 @@ namespace SpecificatR.Infrastructure.Tests.Repositories
             {
                 Id = Guid.NewGuid(),
                 Name = "Count Dooku",
-                Number = 1
+                Number = 1,
             };
             var testEntity2 = new TestEntity
             {
                 Id = Guid.NewGuid(),
                 Name = "Kit Fisto",
-                Number = 2
+                Number = 2,
             };
 
             DbContextOptions<TestDbContext> options = new DbContextOptionsBuilder<TestDbContext>()
@@ -280,10 +235,6 @@ namespace SpecificatR.Infrastructure.Tests.Repositories
             }
         }
 
-        /// <summary>
-        /// The UpdateFieldsAsync_WithProperties_ShouldOnlyUpdateSpecifiedEntityProperties
-        /// </summary>
-        /// <returns>The <see cref="Task"/></returns>
         [Fact]
         public async Task UpdateFieldsAsync_WithProperties_ShouldOnlyUpdateSpecifiedEntityProperties()
         {
@@ -292,7 +243,7 @@ namespace SpecificatR.Infrastructure.Tests.Repositories
             {
                 Id = Guid.NewGuid(),
                 Name = "Anakin Skywalker",
-                Number = 1
+                Number = 1,
             };
 
             DbContextOptions<TestDbContext> options = new DbContextOptionsBuilder<TestDbContext>()
@@ -326,10 +277,6 @@ namespace SpecificatR.Infrastructure.Tests.Repositories
             }
         }
 
-        /// <summary>
-        /// The UpdateFieldsAsync_WithProperties_ShouldUpdateEntityProperties
-        /// </summary>
-        /// <returns>The <see cref="Task"/></returns>
         [Fact]
         public async Task UpdateFieldsAsync_WithProperties_ShouldUpdateEntityProperties()
         {
@@ -338,7 +285,7 @@ namespace SpecificatR.Infrastructure.Tests.Repositories
             {
                 Id = Guid.NewGuid(),
                 Name = "Chewbacca",
-                Number = 1
+                Number = 1,
             };
 
             DbContextOptions<TestDbContext> options = new DbContextOptionsBuilder<TestDbContext>()
@@ -371,10 +318,6 @@ namespace SpecificatR.Infrastructure.Tests.Repositories
             updatedTestEntity.Number.Should().Be(2);
         }
 
-        /// <summary>
-        /// The UpdateFieldsAsync_WithProperties_ShouldUpdateSpecifiedEntityProperty
-        /// </summary>
-        /// <returns>The <see cref="Task"/></returns>
         [Fact]
         public async Task UpdateFieldsAsync_WithProperties_ShouldUpdateSpecifiedEntityProperty()
         {
@@ -383,7 +326,7 @@ namespace SpecificatR.Infrastructure.Tests.Repositories
             {
                 Id = Guid.NewGuid(),
                 Name = "Kylo Ren",
-                Number = 1
+                Number = 1,
             };
 
             DbContextOptions<TestDbContext> options = new DbContextOptionsBuilder<TestDbContext>()

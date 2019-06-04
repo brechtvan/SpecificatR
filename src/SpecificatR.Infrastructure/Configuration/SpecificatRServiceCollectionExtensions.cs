@@ -1,10 +1,8 @@
-﻿//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 // <copyright file="SpecificatRServiceCollectionExtensions.cs" company="David Vanderheyden">
-//     Copyright (c) 2019 All Rights Reserved
+// Copyright (c) David Vanderheyden. All rights reserved.
+// Licensed under the Apache-2.0 license. See https://licenses.nuget.org/Apache-2.0 for full license information.
 // </copyright>
-// <licensed>Distributed under Apache-2.0 license</licensed>
-// <author>David Vanderheyden</author>
-// <date>25/05/2019 10:10:43</date>
 //-----------------------------------------------------------------------
 
 namespace SpecificatR.Infrastructure.Configuration
@@ -13,17 +11,8 @@ namespace SpecificatR.Infrastructure.Configuration
     using Microsoft.Extensions.DependencyInjection;
     using SpecificatR.Infrastructure.Repositories;
 
-    /// <summary>
-    /// Defines the <see cref="SpecificatRServiceCollectionExtensions" />
-    /// </summary>
     public static class SpecificatRServiceCollectionExtensions
     {
-        /// <summary>
-        /// The AddSpecificatR
-        /// </summary>
-        /// <typeparam name="TDbContext"></typeparam>
-        /// <param name="services">The services<see cref="IServiceCollection"/></param>
-        /// <returns>The <see cref="IServiceCollection"/></returns>
         public static IServiceCollection AddSpecificatR<TDbContext>(this IServiceCollection services)
             where TDbContext : DbContext
         {

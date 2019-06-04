@@ -1,11 +1,7 @@
-﻿//-----------------------------------------------------------------------
 // <copyright file="IncludeExpressionResolver.cs" company="David Vanderheyden">
-//     Copyright (c) 2019 All Rights Reserved
+// Copyright (c) David Vanderheyden. All rights reserved.
+// Licensed under the Apache-2.0 license. See https://licenses.nuget.org/Apache-2.0 for full license information.
 // </copyright>
-// <licensed>Distributed under Apache-2.0 license</licensed>
-// <author>David Vanderheyden</author>
-// <date>25/05/2019 10:10:44</date>
-//-----------------------------------------------------------------------
 
 namespace SpecificatR.Infrastructure.Internal
 {
@@ -13,17 +9,8 @@ namespace SpecificatR.Infrastructure.Internal
     using System.Collections.Generic;
     using System.Linq.Expressions;
 
-    /// <summary>
-    /// Defines the <see cref="IncludeExpressionResolver" />
-    /// </summary>
     internal static class IncludeExpressionResolver
     {
-        /// <summary>
-        /// The Resolve
-        /// </summary>
-        /// <typeparam name="TEntity"></typeparam>
-        /// <param name="includeExpression">The includeExpression<see cref="Expression{Func{TEntity, object}}"/></param>
-        /// <returns>The <see cref="string"/></returns>
         public static string Resolve<TEntity>(Expression<Func<TEntity, object>> includeExpression)
         {
             IEnumerable<LambdaExpression> Lambdas(LambdaExpression lambda)
